@@ -1,0 +1,194 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:justify;
+	text-justify:inter-ideograph;
+	font-size:10.5pt;
+	font-family:"Calibri","sans-serif";}
+ /* Page Definitions */
+ @page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	layout-grid:15.6pt;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='text-justify-trim:punctuation'>
+
+<div class=WordSection1 style='layout-grid:15.6pt'>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='font-size:12.0pt'>Practical Machine Learning Project Analysis</span></p>
+
+<p class=MsoNormal align=right style='text-align:right;word-break:break-all'><span
+lang=EN-US>Jiatong Li</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Choosing
+the predictors:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>When I
+looked at summary(data), I found that many variables contained too much blank
+values, NAs,or #DIV/0!s. For example:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>min_yaw_forearm
+&nbsp;amplitude_roll_forearm amplitude_yaw_forearm</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:19216&nbsp;&nbsp; Min.&nbsp;&nbsp; :&nbsp; 0.000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:19216</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>#DIV/0!:&nbsp;&nbsp;
+84&nbsp;&nbsp; 1st Qu.:&nbsp; 1.125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;#DIV/0!:&nbsp;&nbsp; 84</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>-1.2&nbsp;&nbsp;
+:&nbsp;&nbsp; 32&nbsp;&nbsp; Median : 17.770&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00&nbsp;&nbsp; :&nbsp; 322</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>-1.3&nbsp;&nbsp;
+:&nbsp;&nbsp; 31&nbsp;&nbsp; Mean&nbsp;&nbsp; : 24.653</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>-1.4&nbsp;&nbsp;
+:&nbsp;&nbsp; 24&nbsp;&nbsp; 3rd Qu.: 39.875</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>-1.5&nbsp;&nbsp;
+:&nbsp;&nbsp; 24&nbsp;&nbsp; Max.&nbsp;&nbsp; :126.000</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>(Other):&nbsp;
+211&nbsp;&nbsp; NA's&nbsp;&nbsp; :19216</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>From the
+first variable X, simply a sequence vector, we can know there are 19622 rows.
+We can also get 19622 by adding the numbers in the first or third variable I
+just listed above. As 19216/19622=0.9793, those blank or NA takes up at least 98%
+of the rows. Even knnImpute may not properly handle them! So I discarded those
+columns and used the columns with all effective numbers to train and predict. The
+summary of those useful columns look like:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>total_accel_forearm</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Min.&nbsp;&nbsp;
+:&nbsp; 0.00</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>1st Qu.:
+29.00</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Median :
+36.00</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Mean&nbsp;&nbsp;
+: 34.72</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>3rd Qu.:
+41.00</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Max.&nbsp;&nbsp;
+:108.00</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>I also
+discarded the first 6 columns. The first column, X is just the sequence 1,2…19622
+which cannot contribute to predicting the classe. Everyone was asked to perform
+barbell lifts correctly and incorrectly in 5 different ways, so user_name also
+has nothing to do with classe. So did the time stamps. Since new_window has
+about 98% “no”, it may contribute nothing to our prediction. So the final columns
+I selected were c(7:11,37:49,60:68,84:86,102,113:124,140,151:160). Of course, I
+have to include the final column, the classe.</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>The
+model:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>The
+classe is a factor variable. So classification trees is a good choice. Besides,
+random forests is one of the two top performing algorithms. As a result I chose
+random forests.</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>Cross validation:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>I split
+the data into training and testing part, with p=0.7. After training with the
+training part, I predicted on the testing part and got a table:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+A&nbsp;&nbsp;&nbsp; B&nbsp;&nbsp;&nbsp; C&nbsp;&nbsp;&nbsp; D&nbsp;&nbsp;&nbsp;
+E</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp; A
+1674&nbsp;&nbsp;&nbsp; 5&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp; 0</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;
+B&nbsp;&nbsp;&nbsp; 0 1133&nbsp;&nbsp;&nbsp; 6&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp; 0</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;
+C&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 1 1020&nbsp;&nbsp; 11&nbsp;&nbsp;&nbsp;
+0</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;
+D&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;
+953&nbsp;&nbsp;&nbsp; 3</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;
+E&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;
+0 1079</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>There
+are total 5885 samples in the testing part, and 5859 of them are classified
+wright and 26 of them are wrong. So I expect the out of sample error to be
+26/5885=0.44%, or the accuracy is 99.56%. It’s a high accuracy rate.</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>I
+predicted on the given 20 test cases. It gave:</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>1&nbsp;
+2&nbsp; 3&nbsp; 4&nbsp; 5&nbsp; 6&nbsp; 7&nbsp; 8&nbsp; 9 10 11 12 13 14 15 16
+17 18 19 20 </span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>B&nbsp;
+A&nbsp; B&nbsp; A&nbsp; A&nbsp; E&nbsp; D&nbsp; B&nbsp; A&nbsp; A&nbsp; B&nbsp;
+C&nbsp; B&nbsp; A&nbsp; E&nbsp; E&nbsp; A&nbsp; B&nbsp; B&nbsp; B</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>I
+submitted and all of them were right.</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US>In a
+word, the key to a high accuracy rate is choosing the useful columns. I chose
+them manually, a little bit silly but effective. I guess I can use functions to
+choose them next time…</span></p>
+
+</div>
+
+</body>
+
+</html>
